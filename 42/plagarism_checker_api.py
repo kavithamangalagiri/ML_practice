@@ -5,8 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import FastAPI
 from db_config import db_config
-
-app = FastAPI()
+import os
 
 mydb = mysql.connector.connect(
     host=db_config["host"],
@@ -80,14 +79,16 @@ async def get_cosine_similarity_matrices(lesson_content_id: int):
             df.loc[i] = row
         
         # Save the DataFrame to a CSV file in the same folder
-        df.to_csv(f"{lesson_content_id}_lesson_plagiarism.csv", index=False)
+        csv_path = os.path.join(os.getcwd(), f"{lesson_content_id}_lesson_plagiarism.csv")
+        df.to_csv(csv_path, index=False)
 
         # Clean up
         mycursor.close()
 
-        # Convert DataFrame to JSON and return it
-        return df.to_json()
+        # Convert DataFrame to JSON and return it along with the CSV path
+        response = {"json_data": df.to_json(), "csv_path": csv_path.replace("\\\\", "\\")}
+        return response
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, port=8085)
