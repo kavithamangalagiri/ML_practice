@@ -1,0 +1,9 @@
+image:
+  name: python:3.9-slim
+ports:
+  - 8000
+tasks:
+  - command: pip install -r requirements.txt && uvicorn main:app --host=0.0.0.0
+      --port=8000 --reload
+    name: Run FastAPI
+    openMode: split-right
